@@ -43,7 +43,11 @@ class CommentBuilder {
         const info = `**${passed} / ${total}**${details}`;
         const status = `- Tests ${this.getStatusText(success)} in ${(0, common_1.formatElapsedTime)(this._testResult.elapsed)}`;
         const message = `${icon} ${info} ${status}\n`;
-        const body = `<details>\n<summary>${groupTitle}</summary>\n<br/>\n${message}\n</details>\n`;
+        const body = `<details>
+      <summary>${groupTitle}</summary>\n
+      <br/>\n
+      ${message}\n
+      </details>\n`;
         return `${this._header}${body}${passed < total ? this._summaryLink : ""}${this._footer}`;
     }
 }
@@ -293,7 +297,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
             .withHeader(title)
             .withSummaryLink()
             .withFooter()
-            .build("Test Group Title");
+            .build("Unit Tests");
         // Generate the summary
         const summaryGenerator = new SummaryGenerator_1.SummaryGenerator();
         const summary = summaryGenerator.generateSummary(title, testResult);

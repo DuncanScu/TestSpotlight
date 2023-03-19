@@ -26,7 +26,7 @@ const run = async (): Promise<void> => {
       .withHeader(title)
       .withSummaryLink()
       .withFooter()
-      .build("Test Group Title");
+      .build("Unit Tests");
 
     // Generate the summary
     const summaryGenerator = new SummaryGenerator();
