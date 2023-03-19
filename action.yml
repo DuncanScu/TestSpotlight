@@ -15,17 +15,9 @@ inputs:
   results-path:
     description: 'Path to the directory containing trx files'
     required: true
-  result-groups:
-    description: 'Group your results by path adn group name'
-    required: false
-    type: array
-      items:
-        type: object
-        properties:
-          results-path:
-            type: string
-          group-title:
-            type: string
+  results-group:
+    description: ''
+    required: true
 
 runs:
   using: 'node16'

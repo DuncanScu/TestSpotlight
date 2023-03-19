@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import { IActionInputs, IResult } from '../data';
-import { ResultGroup } from '../data/IActionInputs';
 
 const inputs = {
   token: 'github-token',
@@ -29,7 +28,7 @@ export const getInputs = (): IActionInputs => {
     token,
     title: core.getInput(inputs.title),
     resultsPath: core.getInput(inputs.resultsPath),
-    resultGroups: JSON.parse(core.getInput(inputs.resultGroups))
+    resultsGroup: core.getInput(inputs.resultGroups)
   };
 };
 

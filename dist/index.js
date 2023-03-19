@@ -280,14 +280,12 @@ const CommentBuilder_1 = __nccwpck_require__(8278);
 const SummaryGenerator_1 = __nccwpck_require__(7601);
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { token, title, resultsPath, resultGroups } = (0, utils_1.getInputs)();
+        const { token, title, resultsPath, resultsGroup } = (0, utils_1.getInputs)();
         // What if the results path has something nad the groups has things? Merge them
         // What if there is just the resultsPath? pass just that
-        const resultPaths = mergeResultPaths(resultsPath, resultGroups);
-        (0, utils_1.log)(resultPaths[0].resultsPath);
         // Getting the test results
         const testReportProcessor = new TestReportProcessor_1.TestReportProcessor();
-        var testResult = yield testReportProcessor.processReports(resultPaths[0].resultsPath);
+        var testResult = yield testReportProcessor.processReports(resultsPath);
         // Build the comment
         const commentBuilder = new CommentBuilder_1.CommentBuilder(testResult);
         const comment = commentBuilder
@@ -308,13 +306,6 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 run();
-const mergeResultPaths = (resultPath, resultGroups) => {
-    const mergedResult = resultGroups ? resultGroups : [];
-    if (resultPath) {
-        mergedResult.push({ resultsPath: resultPath, groupTitle: "" });
-    }
-    return mergedResult;
-};
 
 
 /***/ }),
@@ -503,7 +494,7 @@ const getInputs = () => {
         token,
         title: core.getInput(inputs.title),
         resultsPath: core.getInput(inputs.resultsPath),
-        resultGroups: JSON.parse(core.getInput(inputs.resultGroups))
+        resultsGroup: core.getInput(inputs.resultGroups)
     };
 };
 exports.getInputs = getInputs;

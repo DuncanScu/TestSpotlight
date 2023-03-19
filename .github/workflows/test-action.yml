@@ -28,7 +28,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-title: Test Results Success
-          result-groups: |
-          [
-            { "results-path": "./__data/success/", "group-title": "Category 1" }
-          ]
+          results-group: Testing Group 1
