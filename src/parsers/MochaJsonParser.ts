@@ -23,6 +23,7 @@ export class MochaJsonParser implements Parser {
 
   private parseSummary = (file: any) => {
     const summary = file.stats
+    console.log(file)
 
     const outcome = summary.passPercent === 100 ? 'Passed' : 'Failed'
 
