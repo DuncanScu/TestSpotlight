@@ -34,7 +34,9 @@ export class TestReportProcessor {
 
       if (!filePaths.length) {
         log(`${group.filePath}, ${group.extension}`)
-        throw Error(`No test results found in ${group.filePath}`)
+        throw Error(
+          `No test results found in ${group.filePath}, with ${group.extension}`
+        )
       }
 
       for (const path of filePaths) {
