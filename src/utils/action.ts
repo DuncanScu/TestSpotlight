@@ -1,15 +1,12 @@
 import * as core from '@actions/core';
 import { IActionInputs, IResult } from '../data';
+import { ResultGroup } from '../data/IActionInputs';
 
 const inputs = {
   token: 'github-token',
   title: 'comment-title',
-  postNewComment: 'post-new-comment',
-  allowFailedTests: 'allow-failed-tests',
   resultsPath: 'results-path',
-  coveragePath: 'coverage-path',
-  coverageType: 'coverage-type',
-  coverageThreshold: 'coverage-threshold'
+  resultGroups: 'result-groups'
 };
 
 const outputs = {
@@ -31,7 +28,8 @@ export const getInputs = (): IActionInputs => {
   return {
     token,
     title: core.getInput(inputs.title),
-    resultsPath: core.getInput(inputs.resultsPath)
+    resultsPath: core.getInput(inputs.resultsPath),
+    resultGroups: JSON.parse(core.getInput(inputs.resultGroups))
   };
 };
 

@@ -2,18 +2,25 @@ import { getInputs, publishComment, setFailed, setSummary } from './utils';
 import { TestReportProcessor } from './TestReportProcessor';
 import { CommentBuilder } from './CommentBuilder';
 import { SummaryGenerator } from './SummaryGenerator';
+import { ResultGroup } from './data/IActionInputs';
 
 const run = async (): Promise<void> => {
   try {
     const {
       token,
       title,
-      resultsPath
+      resultsPath,
+      resultGroups
     } = getInputs();
+
+    // What if the results path has something nad the groups has things? Merge them
+    // What if there is just the resultsPath? pass just that
+
+    const resultPaths = mergeResultPaths(resultsPath, resultGroups);
 
     // Getting the test results
     const testReportProcessor = new TestReportProcessor();
-    var testResult = await testReportProcessor.processReports(resultsPath)
+    var testResult = await testReportProcessor.processReports(resultPaths[0].resultsPath);
 
     // Build the comment
     const commentBuilder = new CommentBuilder(testResult);
@@ -38,3 +45,11 @@ const run = async (): Promise<void> => {
 };
 
 run()
+
+const mergeResultPaths = (resultPath: string | undefined, resultGroups: ResultGroup[] | undefined) : ResultGroup[] => {
+  const mergedResult: ResultGroup[] = resultGroups ? resultGroups : [];
+  if (resultPath){
+    mergedResult.push({resultsPath: resultPath, groupTitle: ""} as ResultGroup)
+  }
+  return mergedResult;
+}
