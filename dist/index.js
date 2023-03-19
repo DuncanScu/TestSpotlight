@@ -483,7 +483,7 @@ class MochaJsonParser {
         });
         this.parseSummary = (file) => {
             const summary = file.stats;
-            (0, utils_1.log)(file);
+            (0, utils_1.log)(JSON.stringify(file));
             const outcome = summary.passPercent === 100 ? 'Passed' : 'Failed';
             return {
                 outcome: outcome,
@@ -711,11 +711,13 @@ const readJsonFile = (filePath) => __awaiter(void 0, void 0, void 0, function* (
         if (!fs_1.default.existsSync(filePath)) {
             return null;
         }
-        const file = fs_1.default.readFileSync(filePath);
-        const jsonData = JSON.parse(JSON.stringify(file));
+        const file = fs_1.default.readFileSync(filePath, 'utf-8');
+        const jsonData = JSON.parse(file);
         return jsonData;
     }
-    catch (error) { }
+    catch (error) {
+        return null;
+    }
 });
 exports.readJsonFile = readJsonFile;
 

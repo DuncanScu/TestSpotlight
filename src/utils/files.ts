@@ -22,8 +22,10 @@ export const readJsonFile = async (filePath: string): Promise<any> => {
       return null
     }
 
-    const file = fs.readFileSync(filePath)
-    const jsonData = JSON.parse(JSON.stringify(file))
+    const file = fs.readFileSync(filePath, 'utf-8')
+    const jsonData = JSON.parse(file)
     return jsonData
-  } catch (error) {}
+  } catch (error) {
+    return null
+  }
 }
