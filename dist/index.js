@@ -116,19 +116,21 @@ class TestReportProcessor {
     processReports(groups) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = this.DefaultTestResult;
+            const filePaths = [];
             groups.forEach((group) => __awaiter(this, void 0, void 0, function* () {
-                const filePaths = this.findReportsInDirectory(group.filePath, group.extension);
+                const paths = this.findReportsInDirectory(group.filePath, group.extension);
                 if (!filePaths.length) {
                     throw Error(`No test results found in ${group.filePath}, with ${group.extension}`);
                 }
-                for (const path of filePaths) {
-                    (0, utils_1.log)(`Current result total = ${result.total}`);
-                    yield this.processResult(path, result, group.extension);
-                    if (!result.success) {
-                        (0, utils_1.setFailed)('Tests Failed');
-                    }
-                }
+                paths.forEach(path => filePaths.push({ path: path, extension: group.extension }));
             }));
+            for (const resultPath of filePaths) {
+                (0, utils_1.log)(`Current result total = ${result.total}`);
+                yield this.processResult(resultPath.path, result, resultPath.extension);
+                if (!result.success) {
+                    (0, utils_1.setFailed)('Tests Failed');
+                }
+            }
             return result;
         });
     }

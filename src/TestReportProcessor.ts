@@ -25,12 +25,9 @@ export class TestReportProcessor {
 
   public async processReports(groups: Group[]): Promise<IResult> {
     const result = this.DefaultTestResult
-
+    const filePaths: {path: string; extension: string}[] = []
     groups.forEach(async group => {
-      const filePaths = this.findReportsInDirectory(
-        group.filePath,
-        group.extension
-      )
+      const paths = this.findReportsInDirectory(group.filePath, group.extension)
 
       if (!filePaths.length) {
         throw Error(
@@ -38,15 +35,19 @@ export class TestReportProcessor {
         )
       }
 
-      for (const path of filePaths) {
-        log(`Current result total = ${result.total}`)
-        await this.processResult(path, result, group.extension)
-
-        if (!result.success) {
-          setFailed('Tests Failed')
-        }
-      }
+      paths.forEach(path =>
+        filePaths.push({path: path, extension: group.extension})
+      )
     })
+
+    for (const resultPath of filePaths) {
+      log(`Current result total = ${result.total}`)
+      await this.processResult(resultPath.path, result, resultPath.extension)
+
+      if (!result.success) {
+        setFailed('Tests Failed')
+      }
+    }
 
     return result
   }
