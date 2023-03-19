@@ -28,4 +28,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-title: Test Results Success
+          results-path: ./__data/fail
           results-group: Testing Group 1
