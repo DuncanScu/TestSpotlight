@@ -2,14 +2,17 @@ import fs from 'fs'
 import path from 'path'
 import {IResult} from './data'
 import {DotnetTrxParser} from './parsers/DotnetTrxParser'
+import {MochaJsonParser} from './parsers/MochaJsonParser'
 import {log, setFailed, setResultOutputs} from './utils'
 
 export class TestReportProcessor {
   private static _instance: TestReportProcessor
   private _dotnetTrxParser: DotnetTrxParser
+  private _mochaJsonParser: MochaJsonParser
 
   private constructor() {
     this._dotnetTrxParser = new DotnetTrxParser()
+    this._mochaJsonParser = new MochaJsonParser()
   }
 
   public static getInstance(): TestReportProcessor {
@@ -52,6 +55,9 @@ export class TestReportProcessor {
     switch (extension) {
       case '.trx':
         result = await this._dotnetTrxParser.parse(path)
+        break
+      case '.json':
+        result = await this._mochaJsonParser.parse(path)
         break
       default:
         throw Error('File type not supported.')

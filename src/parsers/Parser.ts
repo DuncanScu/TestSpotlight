@@ -1,5 +1,5 @@
-import { ResultParser } from "../data";
+import {ResultParser} from '../data'
 
-export interface Parser{
-    parse:ResultParser
+export interface Parser {
+  parse: ResultParser
 }

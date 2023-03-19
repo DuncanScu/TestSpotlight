@@ -1,51 +1,50 @@
-import { ResultParser, ITestSuit, TestOutcome } from '../data';
-import { readXmlFile } from '../utils';
-import { Parser } from './Parser';
-
+import {ResultParser, ITestSuit, TestOutcome} from '../data'
+import {readXmlFile} from '../utils'
+import {Parser} from './Parser'
 
 export class DotnetTrxParser implements Parser {
   public parse: ResultParser = async (filePath: string) => {
-    const file = await readXmlFile(filePath);
-  
+    const file = await readXmlFile(filePath)
+
     if (!file) {
-      return null;
+      return null
     }
-  
-    const { start, finish } = this.parseElapsedTime(file);
-    const summary = this.parseSummary(file);
-    const suits = this.parseSuits(file);
-  
-    const elapsed = finish.getTime() - start.getTime();
-    const skipped = summary.total - summary.executed;
-    const success = summary.failed === 0;
-  
-    return { success, ...summary, skipped, elapsed, suits };
-  };
+
+    const {start, finish} = this.parseElapsedTime(file)
+    const summary = this.parseSummary(file)
+    const suits = this.parseSuits(file)
+
+    const elapsed = finish.getTime() - start.getTime()
+    const skipped = summary.total - summary.executed
+    const success = summary.failed === 0
+
+    return {success, ...summary, skipped, elapsed, suits}
+  }
 
   private parseElapsedTime = (file: any) => {
-    const times = file.TestRun.Times[0]['$'];
-    const start = new Date(times.start);
-    const finish = new Date(times.finish);
-  
-    return { start, finish };
-  };
-  
+    const times = file.TestRun.Times[0]['$']
+    const start = new Date(times.start)
+    const finish = new Date(times.finish)
+
+    return {start, finish}
+  }
+
   private parseSummary = (file: any) => {
-    const summary = file.TestRun.ResultSummary[0];
-    const counters = summary.Counters[0]['$'];
-  
+    const summary = file.TestRun.ResultSummary[0]
+    const counters = summary.Counters[0]['$']
+
     return {
       outcome: String(summary['$'].outcome),
       total: Number(counters.total),
       passed: Number(counters.passed),
       failed: Number(counters.failed),
       executed: Number(counters.executed)
-    };
-  };
-  
+    }
+  }
+
   private parseResults = (file: any) => {
-    const results = file.TestRun.Results[0].UnitTestResult as any[];
-  
+    const results = file.TestRun.Results[0].UnitTestResult as any[]
+
     return results.map((result: any) => ({
       executionId: String(result['$'].executionId),
       testId: String(result['$'].testId),
@@ -61,12 +60,12 @@ export class DotnetTrxParser implements Parser {
       error: String(result.Output?.[0]?.ErrorInfo?.[0]?.Message?.[0] ?? ''),
       trace: String(result.Output?.[0]?.ErrorInfo?.[0]?.StackTrace?.[0] ?? ''),
       relativeResultsDirectory: String(result['$'].relativeResultsDirectory)
-    }));
-  };
-  
+    }))
+  }
+
   private parseDefinitions = (file: any) => {
-    const definitions = file.TestRun.TestDefinitions[0].UnitTest as any[];
-  
+    const definitions = file.TestRun.TestDefinitions[0].UnitTest as any[]
+
     return definitions.map(definition => ({
       id: String(definition['$'].id),
       name: String(definition['$'].name),
@@ -79,43 +78,50 @@ export class DotnetTrxParser implements Parser {
         className: String(definition.TestMethod[0]['$'].className),
         name: String(definition.TestMethod[0]['$'].name)
       }
-    }));
-  };
-  
+    }))
+  }
+
   private parseSuits = (file: any) => {
-    const suits: ITestSuit[] = [];
-    const results = this.parseResults(file);
-    const definitions = this.parseDefinitions(file);
-    const sortedDefinitions = definitions.sort((a, b) => a.name.localeCompare(b.name));
-  
+    const suits: ITestSuit[] = []
+    const results = this.parseResults(file)
+    const definitions = this.parseDefinitions(file)
+    const sortedDefinitions = definitions.sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )
+
     for (const definition of sortedDefinitions) {
-      const result = results.find(r => r.testId === definition.id);
-      const existingSuit = suits.find(s => s.name === definition.testMethod.className);
+      const result = results.find(r => r.testId === definition.id)
+      const existingSuit = suits.find(
+        s => s.name === definition.testMethod.className
+      )
       const suit = existingSuit || {
         name: definition.testMethod.className,
         success: false,
         passed: 0,
         tests: []
-      };
-  
+      }
+
       suit.tests.push({
-        name: definition.name.replace(`${definition.testMethod.className}.`, ''),
+        name: definition.name.replace(
+          `${definition.testMethod.className}.`,
+          ''
+        ),
         output: result?.output ?? '',
         error: result?.error ?? '',
         trace: result?.trace ?? '',
         outcome: result?.outcome || 'NotExecuted'
-      });
-  
+      })
+
       if (!existingSuit) {
-        suits.push(suit);
+        suits.push(suit)
       }
     }
-  
+
     suits.forEach(suit => {
-      suit.success = suit.tests.every(test => test.outcome !== 'Failed');
-      suit.passed = suit.tests.filter(test => test.outcome === 'Passed').length;
-    });
-  
-    return suits;
-  };
+      suit.success = suit.tests.every(test => test.outcome !== 'Failed')
+      suit.passed = suit.tests.filter(test => test.outcome === 'Passed').length
+    })
+
+    return suits
+  }
 }

@@ -91,6 +91,7 @@ exports.TestReportProcessor = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const path_1 = __importDefault(__nccwpck_require__(5622));
 const DotnetTrxParser_1 = __nccwpck_require__(5597);
+const MochaJsonParser_1 = __nccwpck_require__(3288);
 const utils_1 = __nccwpck_require__(1606);
 class TestReportProcessor {
     constructor() {
@@ -104,6 +105,7 @@ class TestReportProcessor {
             suits: []
         };
         this._dotnetTrxParser = new DotnetTrxParser_1.DotnetTrxParser();
+        this._mochaJsonParser = new MochaJsonParser_1.MochaJsonParser();
     }
     static getInstance() {
         if (!this._instance) {
@@ -134,6 +136,9 @@ class TestReportProcessor {
             switch (extension) {
                 case '.trx':
                     result = yield this._dotnetTrxParser.parse(path);
+                    break;
+                case '.json':
+                    result = yield this._mochaJsonParser.parse(path);
                     break;
                 default:
                     throw Error('File type not supported.');
@@ -444,6 +449,81 @@ exports.DotnetTrxParser = DotnetTrxParser;
 
 /***/ }),
 
+/***/ 3288:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MochaJsonParser = void 0;
+const utils_1 = __nccwpck_require__(1606);
+class MochaJsonParser {
+    constructor() {
+        this.parse = (filePath) => __awaiter(this, void 0, void 0, function* () {
+            const file = yield (0, utils_1.readJsonFile)(filePath);
+            if (!file) {
+                return null;
+            }
+            const stats = file.stats;
+            const summary = this.parseSummary(file);
+            const suits = this.parseSuits(file);
+            const skipped = stats.skipped;
+            const success = stats.failures === 0;
+            const elapsed = stats.duration;
+            return Object.assign(Object.assign({ success }, summary), { skipped, elapsed, suits });
+        });
+        this.parseSummary = (file) => {
+            const summary = file.stats;
+            const outcome = summary.passPercent === 100 ? 'Passed' : 'Failed';
+            return {
+                outcome: outcome,
+                total: summary.tests,
+                passed: summary.passes,
+                failed: summary.failures,
+                executed: summary.tests - summary.skipped
+            };
+        };
+        this.parseSuits = (file) => {
+            const suites = file.suites;
+            const results = [];
+            suites.forEach(suite => {
+                const name = suite.title;
+                const success = suite.failures.length === 0;
+                const passed = suite.passes.length;
+                const tests = this.parseTests(suite.tests);
+                results.push({ name, success, passed, tests });
+            });
+            return results;
+        };
+        this.parseTests = (tests) => {
+            const results = [];
+            tests.forEach(test => {
+                var _a, _b, _c, _d;
+                const name = test.title;
+                const output = test.code;
+                const error = (_b = (_a = test.err) === null || _a === void 0 ? void 0 : _a.message) !== null && _b !== void 0 ? _b : '';
+                const trace = (_d = (_c = test.err) === null || _c === void 0 ? void 0 : _c.estack) !== null && _d !== void 0 ? _d : '';
+                const outcome = test.state[0].toUpperCase() + test.state.slice(1);
+                results.push({ name, output, error, trace, outcome });
+            });
+            return results;
+        };
+    }
+}
+exports.MochaJsonParser = MochaJsonParser;
+
+
+/***/ }),
+
 /***/ 194:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -608,7 +688,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.readXmlFile = void 0;
+exports.readJsonFile = exports.readXmlFile = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const xml2js_1 = __importDefault(__nccwpck_require__(6189));
 const readXmlFile = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
@@ -625,6 +705,18 @@ const readXmlFile = (filePath) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.readXmlFile = readXmlFile;
+const readJsonFile = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!fs_1.default.existsSync(filePath)) {
+            return null;
+        }
+        const file = fs_1.default.readFileSync(filePath);
+        const jsonData = JSON.parse(JSON.stringify(file));
+        return jsonData;
+    }
+    catch (error) { }
+});
+exports.readJsonFile = readJsonFile;
 
 
 /***/ }),
