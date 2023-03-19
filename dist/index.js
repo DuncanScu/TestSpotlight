@@ -119,7 +119,7 @@ class TestReportProcessor {
             const filePaths = [];
             groups.forEach((group) => __awaiter(this, void 0, void 0, function* () {
                 const paths = this.findReportsInDirectory(group.filePath, group.extension);
-                if (!filePaths.length) {
+                if (!paths.length) {
                     throw Error(`No test results found in ${group.filePath}, with ${group.extension}`);
                 }
                 paths.forEach(path => filePaths.push({ path: path, extension: group.extension }));

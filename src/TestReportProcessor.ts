@@ -29,7 +29,7 @@ export class TestReportProcessor {
     groups.forEach(async group => {
       const paths = this.findReportsInDirectory(group.filePath, group.extension)
 
-      if (!filePaths.length) {
+      if (!paths.length) {
         throw Error(
           `No test results found in ${group.filePath}, with ${group.extension}`
         )
