@@ -42,9 +42,9 @@ export class CommentBuilder {
       const message = `${icon} ${info} ${status}\n`;
 
       const body = `<details>
-      <summary>${groupTitle}</summary>\n
-      <br/>\n
-      ${message}\n
+      <summary>${groupTitle}</summary>
+      <br/>
+      ${message}
       </details>\n`;
       
       return `${this._header}${body}${passed < total ? this._summaryLink : ""}${this._footer}`;
