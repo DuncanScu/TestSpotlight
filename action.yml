@@ -2,7 +2,7 @@ name: 'TestSpotlight'
 description: 'An easier way to see what broke your code.'
 author: 'DuncanScu'
 branding:
-  icon: '	percent'
+  icon: 'percent'
   color: 'green'
 inputs:
   github-token:
