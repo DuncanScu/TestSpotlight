@@ -90,7 +90,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TestReportProcessor = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(5747));
 const path_1 = __importDefault(__nccwpck_require__(5622));
-const trx_1 = __importDefault(__nccwpck_require__(7421));
+const DotnetTrxParser_1 = __nccwpck_require__(5597);
 const utils_1 = __nccwpck_require__(1606);
 class TestReportProcessor {
     constructor() {
@@ -103,6 +103,13 @@ class TestReportProcessor {
             skipped: 0,
             suits: []
         };
+        this._dotnetTrxParser = new DotnetTrxParser_1.DotnetTrxParser();
+    }
+    static getInstance() {
+        if (!this._instance) {
+            this._instance = new TestReportProcessor();
+        }
+        return this._instance;
     }
     processReports(reportPath) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -121,6 +128,24 @@ class TestReportProcessor {
             return result;
         });
     }
+    processResult(path, aggregatedResult) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = null;
+            const extension = path.split('.')[-1];
+            switch (extension) {
+                case '.trx':
+                    result = yield this._dotnetTrxParser.parse(path);
+                    break;
+                default:
+                    throw Error('File type not supported.');
+            }
+            if (!result) {
+                throw Error(`Failed parsing ${path}`);
+            }
+            (0, utils_1.log)(`Processed ${path}`);
+            this.mergeTestResults(aggregatedResult, result);
+        });
+    }
     findReportsInDirectory(directoryPath, extension) {
         try {
             if (!fs_1.default.existsSync(directoryPath)) {
@@ -134,17 +159,6 @@ class TestReportProcessor {
             return [];
         }
     }
-    processResult(path, aggregatedResult) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = yield (0, trx_1.default)(path);
-            if (!result) {
-                throw Error(`Failed parsing ${path}`);
-            }
-            (0, utils_1.log)(`Processed ${path}`);
-            this.mergeTestResults(aggregatedResult, result);
-        });
-    }
-    ;
     mergeTestResults(result1, result2) {
         result1.success = result1.success && result2.success;
         result1.elapsed += result2.elapsed;
@@ -154,7 +168,6 @@ class TestReportProcessor {
         result1.skipped += result2.skipped;
         result1.suits.push(...result2.suits);
     }
-    ;
 }
 exports.TestReportProcessor = TestReportProcessor;
 
@@ -281,22 +294,17 @@ const SummaryGenerator_1 = __nccwpck_require__(7601);
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { token, title, resultsPath } = (0, utils_1.getInputs)();
-        // Getting the test results
-        const testReportProcessor = new TestReportProcessor_1.TestReportProcessor();
+        const testReportProcessor = TestReportProcessor_1.TestReportProcessor.getInstance();
         var testResult = yield testReportProcessor.processReports(resultsPath);
-        // Build the comment
         const commentBuilder = new CommentBuilder_1.CommentBuilder(testResult);
         const comment = commentBuilder
             .withHeader(title)
             .withSummaryLink()
             .withFooter()
             .build();
-        // Generate the summary
         const summaryGenerator = new SummaryGenerator_1.SummaryGenerator();
         const summary = summaryGenerator.generateSummary(title, testResult);
-        // Set the summary
         yield (0, utils_1.setSummary)(summary);
-        // Publishing results
         yield (0, utils_1.publishComment)(token, title, comment);
     }
     catch (error) {
@@ -308,7 +316,7 @@ run();
 
 /***/ }),
 
-/***/ 7421:
+/***/ 5597:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -323,111 +331,116 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DotnetTrxParser = void 0;
 const utils_1 = __nccwpck_require__(1606);
-const parseTrx = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
-    const file = yield (0, utils_1.readXmlFile)(filePath);
-    if (!file) {
-        return null;
-    }
-    const { start, finish } = parseElapsedTime(file);
-    const summary = parseSummary(file);
-    const suits = parseSuits(file);
-    const elapsed = finish.getTime() - start.getTime();
-    const skipped = summary.total - summary.executed;
-    const success = summary.failed === 0;
-    return Object.assign(Object.assign({ success }, summary), { skipped, elapsed, suits });
-});
-const parseElapsedTime = (file) => {
-    const times = file.TestRun.Times[0]['$'];
-    const start = new Date(times.start);
-    const finish = new Date(times.finish);
-    return { start, finish };
-};
-const parseSummary = (file) => {
-    const summary = file.TestRun.ResultSummary[0];
-    const counters = summary.Counters[0]['$'];
-    return {
-        outcome: String(summary['$'].outcome),
-        total: Number(counters.total),
-        passed: Number(counters.passed),
-        failed: Number(counters.failed),
-        executed: Number(counters.executed)
-    };
-};
-const parseResults = (file) => {
-    const results = file.TestRun.Results[0].UnitTestResult;
-    return results.map((result) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
-        return ({
-            executionId: String(result['$'].executionId),
-            testId: String(result['$'].testId),
-            testName: String(result['$'].testName),
-            testType: String(result['$'].testType),
-            testListId: String(result['$'].testListId),
-            computerName: String(result['$'].computerName),
-            duration: String(result['$'].duration),
-            startTime: new Date(result['$'].startTime),
-            endTime: new Date(result['$'].endTime),
-            outcome: String(result['$'].outcome),
-            output: String((_d = (_c = (_b = (_a = result.Output) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.StdOut) === null || _c === void 0 ? void 0 : _c[0]) !== null && _d !== void 0 ? _d : ''),
-            error: String((_k = (_j = (_h = (_g = (_f = (_e = result.Output) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.ErrorInfo) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.Message) === null || _j === void 0 ? void 0 : _j[0]) !== null && _k !== void 0 ? _k : ''),
-            trace: String((_r = (_q = (_p = (_o = (_m = (_l = result.Output) === null || _l === void 0 ? void 0 : _l[0]) === null || _m === void 0 ? void 0 : _m.ErrorInfo) === null || _o === void 0 ? void 0 : _o[0]) === null || _p === void 0 ? void 0 : _p.StackTrace) === null || _q === void 0 ? void 0 : _q[0]) !== null && _r !== void 0 ? _r : ''),
-            relativeResultsDirectory: String(result['$'].relativeResultsDirectory)
-        });
-    });
-};
-const parseDefinitions = (file) => {
-    const definitions = file.TestRun.TestDefinitions[0].UnitTest;
-    return definitions.map(definition => {
-        var _a;
-        return ({
-            id: String(definition['$'].id),
-            name: String(definition['$'].name),
-            storage: String(definition['$'].storage),
-            description: String((_a = definition.Description) === null || _a === void 0 ? void 0 : _a[0]),
-            executionId: String(definition.Execution[0]['$'].id),
-            testMethod: {
-                codeBase: String(definition.TestMethod[0]['$'].codeBase),
-                adapterTypeName: String(definition.TestMethod[0]['$'].adapterTypeName),
-                className: String(definition.TestMethod[0]['$'].className),
-                name: String(definition.TestMethod[0]['$'].name)
+class DotnetTrxParser {
+    constructor() {
+        this.parse = (filePath) => __awaiter(this, void 0, void 0, function* () {
+            const file = yield (0, utils_1.readXmlFile)(filePath);
+            if (!file) {
+                return null;
             }
+            const { start, finish } = this.parseElapsedTime(file);
+            const summary = this.parseSummary(file);
+            const suits = this.parseSuits(file);
+            const elapsed = finish.getTime() - start.getTime();
+            const skipped = summary.total - summary.executed;
+            const success = summary.failed === 0;
+            return Object.assign(Object.assign({ success }, summary), { skipped, elapsed, suits });
         });
-    });
-};
-const parseSuits = (file) => {
-    var _a, _b, _c;
-    const suits = [];
-    const results = parseResults(file);
-    const definitions = parseDefinitions(file);
-    const sortedDefinitions = definitions.sort((a, b) => a.name.localeCompare(b.name));
-    for (const definition of sortedDefinitions) {
-        const result = results.find(r => r.testId === definition.id);
-        const existingSuit = suits.find(s => s.name === definition.testMethod.className);
-        const suit = existingSuit || {
-            name: definition.testMethod.className,
-            success: false,
-            passed: 0,
-            tests: []
+        this.parseElapsedTime = (file) => {
+            const times = file.TestRun.Times[0]['$'];
+            const start = new Date(times.start);
+            const finish = new Date(times.finish);
+            return { start, finish };
         };
-        suit.tests.push({
-            name: definition.name.replace(`${definition.testMethod.className}.`, ''),
-            output: (_a = result === null || result === void 0 ? void 0 : result.output) !== null && _a !== void 0 ? _a : '',
-            error: (_b = result === null || result === void 0 ? void 0 : result.error) !== null && _b !== void 0 ? _b : '',
-            trace: (_c = result === null || result === void 0 ? void 0 : result.trace) !== null && _c !== void 0 ? _c : '',
-            outcome: (result === null || result === void 0 ? void 0 : result.outcome) || 'NotExecuted'
-        });
-        if (!existingSuit) {
-            suits.push(suit);
-        }
+        this.parseSummary = (file) => {
+            const summary = file.TestRun.ResultSummary[0];
+            const counters = summary.Counters[0]['$'];
+            return {
+                outcome: String(summary['$'].outcome),
+                total: Number(counters.total),
+                passed: Number(counters.passed),
+                failed: Number(counters.failed),
+                executed: Number(counters.executed)
+            };
+        };
+        this.parseResults = (file) => {
+            const results = file.TestRun.Results[0].UnitTestResult;
+            return results.map((result) => {
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+                return ({
+                    executionId: String(result['$'].executionId),
+                    testId: String(result['$'].testId),
+                    testName: String(result['$'].testName),
+                    testType: String(result['$'].testType),
+                    testListId: String(result['$'].testListId),
+                    computerName: String(result['$'].computerName),
+                    duration: String(result['$'].duration),
+                    startTime: new Date(result['$'].startTime),
+                    endTime: new Date(result['$'].endTime),
+                    outcome: String(result['$'].outcome),
+                    output: String((_d = (_c = (_b = (_a = result.Output) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.StdOut) === null || _c === void 0 ? void 0 : _c[0]) !== null && _d !== void 0 ? _d : ''),
+                    error: String((_k = (_j = (_h = (_g = (_f = (_e = result.Output) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.ErrorInfo) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.Message) === null || _j === void 0 ? void 0 : _j[0]) !== null && _k !== void 0 ? _k : ''),
+                    trace: String((_r = (_q = (_p = (_o = (_m = (_l = result.Output) === null || _l === void 0 ? void 0 : _l[0]) === null || _m === void 0 ? void 0 : _m.ErrorInfo) === null || _o === void 0 ? void 0 : _o[0]) === null || _p === void 0 ? void 0 : _p.StackTrace) === null || _q === void 0 ? void 0 : _q[0]) !== null && _r !== void 0 ? _r : ''),
+                    relativeResultsDirectory: String(result['$'].relativeResultsDirectory)
+                });
+            });
+        };
+        this.parseDefinitions = (file) => {
+            const definitions = file.TestRun.TestDefinitions[0].UnitTest;
+            return definitions.map(definition => {
+                var _a;
+                return ({
+                    id: String(definition['$'].id),
+                    name: String(definition['$'].name),
+                    storage: String(definition['$'].storage),
+                    description: String((_a = definition.Description) === null || _a === void 0 ? void 0 : _a[0]),
+                    executionId: String(definition.Execution[0]['$'].id),
+                    testMethod: {
+                        codeBase: String(definition.TestMethod[0]['$'].codeBase),
+                        adapterTypeName: String(definition.TestMethod[0]['$'].adapterTypeName),
+                        className: String(definition.TestMethod[0]['$'].className),
+                        name: String(definition.TestMethod[0]['$'].name)
+                    }
+                });
+            });
+        };
+        this.parseSuits = (file) => {
+            var _a, _b, _c;
+            const suits = [];
+            const results = this.parseResults(file);
+            const definitions = this.parseDefinitions(file);
+            const sortedDefinitions = definitions.sort((a, b) => a.name.localeCompare(b.name));
+            for (const definition of sortedDefinitions) {
+                const result = results.find(r => r.testId === definition.id);
+                const existingSuit = suits.find(s => s.name === definition.testMethod.className);
+                const suit = existingSuit || {
+                    name: definition.testMethod.className,
+                    success: false,
+                    passed: 0,
+                    tests: []
+                };
+                suit.tests.push({
+                    name: definition.name.replace(`${definition.testMethod.className}.`, ''),
+                    output: (_a = result === null || result === void 0 ? void 0 : result.output) !== null && _a !== void 0 ? _a : '',
+                    error: (_b = result === null || result === void 0 ? void 0 : result.error) !== null && _b !== void 0 ? _b : '',
+                    trace: (_c = result === null || result === void 0 ? void 0 : result.trace) !== null && _c !== void 0 ? _c : '',
+                    outcome: (result === null || result === void 0 ? void 0 : result.outcome) || 'NotExecuted'
+                });
+                if (!existingSuit) {
+                    suits.push(suit);
+                }
+            }
+            suits.forEach(suit => {
+                suit.success = suit.tests.every(test => test.outcome !== 'Failed');
+                suit.passed = suit.tests.filter(test => test.outcome === 'Passed').length;
+            });
+            return suits;
+        };
     }
-    suits.forEach(suit => {
-        suit.success = suit.tests.every(test => test.outcome !== 'Failed');
-        suit.passed = suit.tests.filter(test => test.outcome === 'Passed').length;
-    });
-    return suits;
-};
-exports.default = parseTrx;
+}
+exports.DotnetTrxParser = DotnetTrxParser;
 
 
 /***/ }),
