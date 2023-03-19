@@ -36,14 +36,21 @@ class CommentBuilder {
         this._footer = this._context.commit ? `<br/>_✏️ updated for commit ${this._context.commit.substring(0, 8)}_` : '';
         return this;
     }
-    build() {
+    build(groupTitle) {
         const { total, passed, failed, skipped, success } = this._testResult;
-        const title = `${this.getStatusIcon(success)}`;
+        const icon = `${this.getStatusIcon(success)}`;
         const details = failed || skipped ? ` (${failed} failed, ${skipped} skipped)` : '';
         const info = `**${passed} / ${total}**${details}`;
         const status = `- Tests ${this.getStatusText(success)} in ${(0, common_1.formatElapsedTime)(this._testResult.elapsed)}`;
-        const message = `${title} ${info} ${status}\n`;
-        return `${this._header}${message}${passed < total ? this._summaryLink : ""}${this._footer}`;
+        const message = `${icon} ${info} ${status}\n`;
+        return `${this._header}
+      <details>
+      <br/>
+      ${groupTitle}
+      ${message}
+      </details>
+      ${passed < total ? this._summaryLink : ""}
+      ${this._footer}`;
     }
 }
 exports.CommentBuilder = CommentBuilder;
@@ -292,7 +299,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
             .withHeader(title)
             .withSummaryLink()
             .withFooter()
-            .build();
+            .build("Test Group Title");
         // Generate the summary
         const summaryGenerator = new SummaryGenerator_1.SummaryGenerator();
         const summary = summaryGenerator.generateSummary(title, testResult);

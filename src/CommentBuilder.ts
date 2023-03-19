@@ -32,16 +32,23 @@ export class CommentBuilder {
       return this;
     }
   
-    public build() : string {
+    public build(groupTitle:string) : string {
       const { total, passed, failed, skipped, success } = this._testResult;
-      const title = `${this.getStatusIcon(success)}`;
+      const icon = `${this.getStatusIcon(success)}`;
       const details = failed || skipped ? ` (${failed} failed, ${skipped} skipped)` : '';
       const info = `**${passed} / ${total}**${details}`;
       const status = `- Tests ${this.getStatusText(success)} in ${formatElapsedTime(this._testResult.elapsed)}`;
 
-      const message = `${title} ${info} ${status}\n`;
+      const message = `${icon} ${info} ${status}\n`;
       
-      return `${this._header}${message}${passed < total ? this._summaryLink : ""}${this._footer}`;
+      return `${this._header}
+      <details>
+      <br/>
+      ${groupTitle}
+      ${message}
+      </details>
+      ${passed < total ? this._summaryLink : ""}
+      ${this._footer}`;
     }
 
     private getStatusIcon = (success: boolean): string => (success ? '🧪' : '❌');
