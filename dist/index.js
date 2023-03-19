@@ -122,14 +122,13 @@ class TestReportProcessor {
                     throw Error(`No test results found in ${group.filePath}, with ${group.extension}`);
                 }
                 for (const path of filePaths) {
+                    (0, utils_1.log)(`Current result total = ${result.total}`);
                     yield this.processResult(path, result, group.extension);
-                    (0, utils_1.log)(String(result.total));
+                    if (!result.success) {
+                        (0, utils_1.setFailed)('Tests Failed');
+                    }
                 }
             }));
-            if (!result.success) {
-                (0, utils_1.setFailed)('Tests Failed');
-            }
-            (0, utils_1.setResultOutputs)(result);
             return result;
         });
     }

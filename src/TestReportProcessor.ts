@@ -39,16 +39,14 @@ export class TestReportProcessor {
       }
 
       for (const path of filePaths) {
+        log(`Current result total = ${result.total}`)
         await this.processResult(path, result, group.extension)
-        log(String(result.total))
+
+        if (!result.success) {
+          setFailed('Tests Failed')
+        }
       }
     })
-
-    if (!result.success) {
-      setFailed('Tests Failed')
-    }
-
-    setResultOutputs(result)
 
     return result
   }
