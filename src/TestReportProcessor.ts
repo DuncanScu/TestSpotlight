@@ -40,6 +40,7 @@ export class TestReportProcessor {
 
       for (const path of filePaths) {
         await this.processResult(path, result, group.extension)
+        log(String(result.total))
       }
     })
 
@@ -75,7 +76,7 @@ export class TestReportProcessor {
     }
 
     log(`Processed ${path}`)
-    this.mergeTestResults(aggregatedResult, result)
+    return this.mergeTestResults(aggregatedResult, result)
   }
 
   private findReportsInDirectory(

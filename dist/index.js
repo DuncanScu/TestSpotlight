@@ -123,6 +123,7 @@ class TestReportProcessor {
                 }
                 for (const path of filePaths) {
                     yield this.processResult(path, result, group.extension);
+                    (0, utils_1.log)(String(result.total));
                 }
             }));
             if (!result.success) {
@@ -149,7 +150,7 @@ class TestReportProcessor {
                 throw Error(`Failed parsing ${path}`);
             }
             (0, utils_1.log)(`Processed ${path}`);
-            this.mergeTestResults(aggregatedResult, result);
+            return this.mergeTestResults(aggregatedResult, result);
         });
     }
     findReportsInDirectory(directoryPath, extension) {
