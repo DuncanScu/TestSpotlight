@@ -124,11 +124,11 @@ class TestReportProcessor {
                 for (const path of filePaths) {
                     yield this.processResult(path, result, group.extension);
                 }
-                (0, utils_1.setResultOutputs)(result);
             }));
             if (!result.success) {
                 (0, utils_1.setFailed)('Tests Failed');
             }
+            (0, utils_1.setResultOutputs)(result);
             return result;
         });
     }

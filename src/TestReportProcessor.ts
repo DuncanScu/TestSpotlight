@@ -41,13 +41,13 @@ export class TestReportProcessor {
       for (const path of filePaths) {
         await this.processResult(path, result, group.extension)
       }
-
-      setResultOutputs(result)
     })
 
     if (!result.success) {
       setFailed('Tests Failed')
     }
+
+    setResultOutputs(result)
 
     return result
   }
