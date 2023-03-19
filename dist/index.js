@@ -111,10 +111,10 @@ class TestReportProcessor {
         }
         return this._instance;
     }
-    processReports(reportPath) {
+    processReports(reportPath, extension) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = this.DefaultTestResult;
-            const filePaths = this.findReportsInDirectory(reportPath, '.trx');
+            const filePaths = this.findReportsInDirectory(reportPath, extension);
             if (!filePaths.length) {
                 throw Error(`No test results found in ${reportPath}`);
             }
@@ -293,9 +293,9 @@ const CommentBuilder_1 = __nccwpck_require__(8278);
 const SummaryGenerator_1 = __nccwpck_require__(7601);
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { token, title, resultsPath } = (0, utils_1.getInputs)();
+        const { token, title, resultsPath, fileType } = (0, utils_1.getInputs)();
         const testReportProcessor = TestReportProcessor_1.TestReportProcessor.getInstance();
-        var testResult = yield testReportProcessor.processReports(resultsPath);
+        var testResult = yield testReportProcessor.processReports(resultsPath, fileType);
         const commentBuilder = new CommentBuilder_1.CommentBuilder(testResult);
         const comment = commentBuilder
             .withHeader(title)
@@ -484,12 +484,8 @@ const core = __importStar(__nccwpck_require__(2186));
 const inputs = {
     token: 'github-token',
     title: 'comment-title',
-    postNewComment: 'post-new-comment',
-    allowFailedTests: 'allow-failed-tests',
     resultsPath: 'results-path',
-    coveragePath: 'coverage-path',
-    coverageType: 'coverage-type',
-    coverageThreshold: 'coverage-threshold'
+    fileType: 'file-type'
 };
 const outputs = {
     total: 'tests-total',
@@ -508,7 +504,8 @@ const getInputs = () => {
     return {
         token,
         title: core.getInput(inputs.title),
-        resultsPath: core.getInput(inputs.resultsPath)
+        resultsPath: core.getInput(inputs.resultsPath),
+        fileType: core.getInput(inputs.fileType)
     };
 };
 exports.getInputs = getInputs;

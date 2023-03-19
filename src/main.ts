@@ -5,10 +5,13 @@ import {SummaryGenerator} from './SummaryGenerator'
 
 const run = async (): Promise<void> => {
   try {
-    const {token, title, resultsPath} = getInputs()
+    const {token, title, resultsPath, fileType} = getInputs()
 
     const testReportProcessor = TestReportProcessor.getInstance()
-    var testResult = await testReportProcessor.processReports(resultsPath)
+    var testResult = await testReportProcessor.processReports(
+      resultsPath,
+      fileType
+    )
 
     const commentBuilder = new CommentBuilder(testResult)
     const comment = commentBuilder

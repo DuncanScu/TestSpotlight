@@ -19,9 +19,12 @@ export class TestReportProcessor {
     return this._instance
   }
 
-  public async processReports(reportPath: string): Promise<IResult> {
+  public async processReports(
+    reportPath: string,
+    extension: string
+  ): Promise<IResult> {
     const result = this.DefaultTestResult
-    const filePaths = this.findReportsInDirectory(reportPath, '.trx')
+    const filePaths = this.findReportsInDirectory(reportPath, extension)
     if (!filePaths.length) {
       throw Error(`No test results found in ${reportPath}`)
     }
