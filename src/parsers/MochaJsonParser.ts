@@ -36,7 +36,7 @@ export class MochaJsonParser implements Parser {
   }
 
   private parseSuits = (file: any) => {
-    const suites: any[] = file.suites
+    const suites: any[] = file.results.suites
     log('Suites')
     const results: ITestSuit[] = []
     suites.forEach(suite => {

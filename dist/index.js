@@ -493,7 +493,7 @@ class MochaJsonParser {
             };
         };
         this.parseSuits = (file) => {
-            const suites = file.suites;
+            const suites = file.results.suites;
             (0, utils_1.log)('Suites');
             const results = [];
             suites.forEach(suite => {
