@@ -483,6 +483,7 @@ class MochaJsonParser {
         });
         this.parseSummary = (file) => {
             const summary = file.stats;
+            (0, utils_1.log)(file);
             const outcome = summary.passPercent === 100 ? 'Passed' : 'Failed';
             return {
                 outcome: outcome,

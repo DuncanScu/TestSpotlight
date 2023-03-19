@@ -1,5 +1,5 @@
 import {ITest, ITestSuit, ResultParser} from '../data'
-import {readJsonFile} from '../utils'
+import {log, readJsonFile} from '../utils'
 import {Parser} from './Parser'
 
 export class MochaJsonParser implements Parser {
@@ -23,7 +23,7 @@ export class MochaJsonParser implements Parser {
 
   private parseSummary = (file: any) => {
     const summary = file.stats
-    console.log(file)
+    log(file)
 
     const outcome = summary.passPercent === 100 ? 'Passed' : 'Failed'
 
