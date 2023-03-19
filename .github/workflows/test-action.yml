@@ -28,12 +28,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-title: Test Results Success
-          # results-path: ./__data/success/
           result-groups: |
-            [{results-path: ./__data/fail/, group-title: Test Group Title}]
-      # - name: Test Results Fail
-      #   uses: ./
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     comment-title: Test Results Fail
-      #     results-path: ./__data/fail/
+          [
+            { "results-path": "./__data/success/", "group-title": "Category 1" }
+          ]
