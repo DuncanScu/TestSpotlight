@@ -24,11 +24,10 @@
   ],
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "@actions/core": "^1.10.0",
-    "xml2js": "^0.4.23"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@actions/core": "^1.10.0",
+    "xml2js": "^0.4.23",
     "@actions/github": "^5.1.1",
     "@types/node": "^18.11.0",
     "@types/xml2js": "^0.4.11",
