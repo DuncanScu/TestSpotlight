@@ -28,4 +28,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-title: Test Results Success
-          groups: ./__data/success/:.trx, ./__data/success/:.json
+          groups: ./__data/success/:.trx,./__data/success/:.json
