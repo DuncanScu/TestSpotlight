@@ -43,14 +43,8 @@ class CommentBuilder {
         const info = `**${passed} / ${total}**${details}`;
         const status = `- Tests ${this.getStatusText(success)} in ${(0, common_1.formatElapsedTime)(this._testResult.elapsed)}`;
         const message = `${icon} ${info} ${status}\n`;
-        return `${this._header}
-      <details>
-      <br/>
-      ${groupTitle}
-      ${message}
-      </details>
-      ${passed < total ? this._summaryLink : ""}
-      ${this._footer}`;
+        const body = `<details>\n${groupTitle}\n<br/>\n${message}\n</details>\n`;
+        return `${this._header}${body}${passed < total ? this._summaryLink : ""}${this._footer}`;
     }
 }
 exports.CommentBuilder = CommentBuilder;
