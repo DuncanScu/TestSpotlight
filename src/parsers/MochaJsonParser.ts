@@ -9,6 +9,7 @@ export class MochaJsonParser implements Parser {
     if (!file) {
       return null
     }
+
     const stats = file.stats
 
     const summary = this.parseSummary(file)
@@ -36,9 +37,9 @@ export class MochaJsonParser implements Parser {
   }
 
   private parseSuits = (file: any) => {
+    log(JSON.stringify(file))
     const suites: any[] = file.results.suites
     log('Suites')
-    log(String(suites.length))
     const results: ITestSuit[] = []
     suites.forEach(suite => {
       const name = suite.title

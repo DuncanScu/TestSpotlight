@@ -23,7 +23,7 @@ export const readJsonFile = async (filePath: string): Promise<any> => {
     }
 
     const file = fs.readFileSync(filePath, 'utf-8')
-    const jsonData = JSON.parse(file)
+    const jsonData: object = JSON.parse(file)
     return jsonData
   } catch (error) {
     return null
