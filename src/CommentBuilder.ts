@@ -40,8 +40,10 @@ export class CommentBuilder {
       const status = `- Tests ${this.getStatusText(success)} in ${formatElapsedTime(this._testResult.elapsed)}`;
 
       const message = `${icon} ${info} ${status}\n`;
+
+      const body = `<details>\n${groupTitle}\n<br/>\n${message}\n</details>\n`;
       
-      return `${this._header}<details>${groupTitle}<br/>${message}</details>${passed < total ? this._summaryLink : ""}${this._footer}`;
+      return `${this._header}${body}${passed < total ? this._summaryLink : ""}${this._footer}`;
     }
 
     private getStatusIcon = (success: boolean): string => (success ? '🧪' : '❌');
