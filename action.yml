@@ -12,11 +12,14 @@ inputs:
     description: 'Pull Request comment title'
     required: false
     default: 'Test Results'
-  results-path:
-    description: 'Path to the directory containing trx files'
-    required: true
-  file-type:
-    description: 'File extension of the files'
+  # results-path:
+  #   description: 'Path to the directory containing trx files'
+  #   required: true
+  # file-type:
+  #   description: 'File extension of the files'
+  #   required: true
+  groups:
+    description: 'newline-seperated list of filesources. Groups must of be of format <source>:<extension>.'
     required: true
 
 runs:

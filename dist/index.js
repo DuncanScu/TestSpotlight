@@ -297,7 +297,11 @@ const CommentBuilder_1 = __nccwpck_require__(8278);
 const SummaryGenerator_1 = __nccwpck_require__(7601);
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { token, title, resultsPath, fileType } = (0, utils_1.getInputs)();
+        const { token, title, groups } = (0, utils_1.getInputs)();
+        const groupsData = groups.split(',');
+        (0, utils_1.log)(groupsData[0]);
+        const resultsPath = groupsData[0].split(':')[0];
+        const fileType = groupsData[0].split(':')[1];
         const testReportProcessor = TestReportProcessor_1.TestReportProcessor.getInstance();
         var testResult = yield testReportProcessor.processReports(resultsPath, fileType);
         const commentBuilder = new CommentBuilder_1.CommentBuilder(testResult);
@@ -564,8 +568,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const inputs = {
     token: 'github-token',
     title: 'comment-title',
-    resultsPath: 'results-path',
-    fileType: 'file-type'
+    groups: 'groups'
 };
 const outputs = {
     total: 'tests-total',
@@ -584,8 +587,7 @@ const getInputs = () => {
     return {
         token,
         title: core.getInput(inputs.title),
-        resultsPath: core.getInput(inputs.resultsPath),
-        fileType: core.getInput(inputs.fileType)
+        groups: core.getInput(inputs.groups)
     };
 };
 exports.getInputs = getInputs;
