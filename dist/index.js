@@ -119,7 +119,7 @@ class TestReportProcessor {
                 throw Error(`No test results found in ${reportPath}`);
             }
             for (const path of filePaths) {
-                yield this.processResult(path, result);
+                yield this.processResult(path, result, extension);
             }
             (0, utils_1.setResultOutputs)(result);
             if (!result.success) {
@@ -128,10 +128,9 @@ class TestReportProcessor {
             return result;
         });
     }
-    processResult(path, aggregatedResult) {
+    processResult(path, aggregatedResult, extension) {
         return __awaiter(this, void 0, void 0, function* () {
             let result = null;
-            const extension = path.split('.')[-1];
             switch (extension) {
                 case '.trx':
                     result = yield this._dotnetTrxParser.parse(path);

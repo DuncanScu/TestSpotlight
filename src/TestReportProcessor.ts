@@ -30,7 +30,7 @@ export class TestReportProcessor {
     }
 
     for (const path of filePaths) {
-      await this.processResult(path, result)
+      await this.processResult(path, result, extension)
     }
 
     setResultOutputs(result)
@@ -44,11 +44,11 @@ export class TestReportProcessor {
 
   private async processResult(
     path: string,
-    aggregatedResult: IResult
+    aggregatedResult: IResult,
+    extension: string
   ): Promise<void> {
     let result: IResult | null = null
 
-    const extension = path.split('.')[-1]
     switch (extension) {
       case '.trx':
         result = await this._dotnetTrxParser.parse(path)
