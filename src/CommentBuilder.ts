@@ -41,14 +41,7 @@ export class CommentBuilder {
 
       const message = `${icon} ${info} ${status}\n`;
       
-      return `${this._header}
-      <details>
-      <br/>
-      ${groupTitle}
-      ${message}
-      </details>
-      ${passed < total ? this._summaryLink : ""}
-      ${this._footer}`;
+      return `${this._header}<details>${groupTitle}<br/>${message}</details>${passed < total ? this._summaryLink : ""}${this._footer}`;
     }
 
     private getStatusIcon = (success: boolean): string => (success ? '🧪' : '❌');
