@@ -495,6 +495,7 @@ class MochaJsonParser {
         this.parseSuits = (file) => {
             const suites = file.results.suites;
             (0, utils_1.log)('Suites');
+            (0, utils_1.log)(String(suites.length));
             const results = [];
             suites.forEach(suite => {
                 const name = suite.title;
