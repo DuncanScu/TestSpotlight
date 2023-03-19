@@ -483,7 +483,6 @@ class MochaJsonParser {
         });
         this.parseSummary = (file) => {
             const summary = file.stats;
-            (0, utils_1.log)(JSON.stringify(file));
             const outcome = summary.passPercent === 100 ? 'Passed' : 'Failed';
             return {
                 outcome: outcome,
@@ -495,6 +494,7 @@ class MochaJsonParser {
         };
         this.parseSuits = (file) => {
             const suites = file.suites;
+            (0, utils_1.log)('Suites');
             const results = [];
             suites.forEach(suite => {
                 const name = suite.title;
@@ -507,6 +507,7 @@ class MochaJsonParser {
         };
         this.parseTests = (tests) => {
             const results = [];
+            (0, utils_1.log)('Tests');
             tests.forEach(test => {
                 var _a, _b, _c, _d;
                 const name = test.title;

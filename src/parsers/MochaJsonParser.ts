@@ -23,7 +23,6 @@ export class MochaJsonParser implements Parser {
 
   private parseSummary = (file: any) => {
     const summary = file.stats
-    log(JSON.stringify(file))
 
     const outcome = summary.passPercent === 100 ? 'Passed' : 'Failed'
 
@@ -38,6 +37,7 @@ export class MochaJsonParser implements Parser {
 
   private parseSuits = (file: any) => {
     const suites: any[] = file.suites
+    log('Suites')
     const results: ITestSuit[] = []
     suites.forEach(suite => {
       const name = suite.title
@@ -51,6 +51,7 @@ export class MochaJsonParser implements Parser {
 
   private parseTests = (tests: any[]): ITest[] => {
     const results: ITest[] = []
+    log('Tests')
     tests.forEach(test => {
       const name = test.title
       const output = test.code
