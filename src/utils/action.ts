@@ -4,8 +4,7 @@ import {IActionInputs, IResult} from '../data'
 const inputs = {
   token: 'github-token',
   title: 'comment-title',
-  resultsPath: 'results-path',
-  fileType: 'file-type'
+  groups: 'groups'
 }
 
 const outputs = {
@@ -27,8 +26,7 @@ export const getInputs = (): IActionInputs => {
   return {
     token,
     title: core.getInput(inputs.title),
-    resultsPath: core.getInput(inputs.resultsPath),
-    fileType: core.getInput(inputs.fileType)
+    groups: core.getInput(inputs.groups)
   }
 }
 

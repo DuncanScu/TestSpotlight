@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import {IResult} from './data'
+import {Group} from './data/Group'
 import {DotnetTrxParser} from './parsers/DotnetTrxParser'
 import {MochaJsonParser} from './parsers/MochaJsonParser'
 import {log, setFailed, setResultOutputs} from './utils'
@@ -22,24 +23,30 @@ export class TestReportProcessor {
     return this._instance
   }
 
-  public async processReports(
-    reportPath: string,
-    extension: string
-  ): Promise<IResult> {
+  public async processReports(groups: Group[]): Promise<IResult> {
     const result = this.DefaultTestResult
-    const filePaths = this.findReportsInDirectory(reportPath, extension)
-    if (!filePaths.length) {
-      throw Error(`No test results found in ${reportPath}`)
-    }
+    const filePaths: {path: string; extension: string}[] = []
+    groups.forEach(async group => {
+      const paths = this.findReportsInDirectory(group.filePath, group.extension)
 
-    for (const path of filePaths) {
-      await this.processResult(path, result, extension)
-    }
+      if (!paths.length) {
+        throw Error(
+          `No test results found in ${group.filePath}, with ${group.extension}`
+        )
+      }
 
-    setResultOutputs(result)
+      paths.forEach(path =>
+        filePaths.push({path: path, extension: group.extension})
+      )
+    })
 
-    if (!result.success) {
-      setFailed('Tests Failed')
+    for (const resultPath of filePaths) {
+      log(`Current result total = ${result.total}`)
+      await this.processResult(resultPath.path, result, resultPath.extension)
+
+      if (!result.success) {
+        setFailed('Tests Failed')
+      }
     }
 
     return result
@@ -68,7 +75,7 @@ export class TestReportProcessor {
     }
 
     log(`Processed ${path}`)
-    this.mergeTestResults(aggregatedResult, result)
+    return this.mergeTestResults(aggregatedResult, result)
   }
 
   private findReportsInDirectory(

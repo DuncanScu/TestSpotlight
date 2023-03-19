@@ -28,11 +28,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-title: Test Results Success
-          results-path: ./__data/success/
-          file-type: .json
-      # - name: Test Results Fail
-      #   uses: ./
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     comment-title: Test Results Fail
-      #     results-path: ./__data/fail/
+          groups: ./__data/success/:.trx,./__data/success/:.json

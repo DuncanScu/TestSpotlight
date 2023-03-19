@@ -113,19 +113,23 @@ class TestReportProcessor {
         }
         return this._instance;
     }
-    processReports(reportPath, extension) {
+    processReports(groups) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = this.DefaultTestResult;
-            const filePaths = this.findReportsInDirectory(reportPath, extension);
-            if (!filePaths.length) {
-                throw Error(`No test results found in ${reportPath}`);
-            }
-            for (const path of filePaths) {
-                yield this.processResult(path, result, extension);
-            }
-            (0, utils_1.setResultOutputs)(result);
-            if (!result.success) {
-                (0, utils_1.setFailed)('Tests Failed');
+            const filePaths = [];
+            groups.forEach((group) => __awaiter(this, void 0, void 0, function* () {
+                const paths = this.findReportsInDirectory(group.filePath, group.extension);
+                if (!paths.length) {
+                    throw Error(`No test results found in ${group.filePath}, with ${group.extension}`);
+                }
+                paths.forEach(path => filePaths.push({ path: path, extension: group.extension }));
+            }));
+            for (const resultPath of filePaths) {
+                (0, utils_1.log)(`Current result total = ${result.total}`);
+                yield this.processResult(resultPath.path, result, resultPath.extension);
+                if (!result.success) {
+                    (0, utils_1.setFailed)('Tests Failed');
+                }
             }
             return result;
         });
@@ -147,7 +151,7 @@ class TestReportProcessor {
                 throw Error(`Failed parsing ${path}`);
             }
             (0, utils_1.log)(`Processed ${path}`);
-            this.mergeTestResults(aggregatedResult, result);
+            return this.mergeTestResults(aggregatedResult, result);
         });
     }
     findReportsInDirectory(directoryPath, extension) {
@@ -174,6 +178,24 @@ class TestReportProcessor {
     }
 }
 exports.TestReportProcessor = TestReportProcessor;
+
+
+/***/ }),
+
+/***/ 9894:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getTestGroups = void 0;
+const getTestGroups = (groupsString) => {
+    return groupsString.split(',').map(groupData => {
+        const [filePath, extension] = groupData.split(':');
+        return { filePath, extension };
+    });
+};
+exports.getTestGroups = getTestGroups;
 
 
 /***/ }),
@@ -295,11 +317,13 @@ const utils_1 = __nccwpck_require__(1606);
 const TestReportProcessor_1 = __nccwpck_require__(7182);
 const CommentBuilder_1 = __nccwpck_require__(8278);
 const SummaryGenerator_1 = __nccwpck_require__(7601);
+const Group_1 = __nccwpck_require__(9894);
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { token, title, resultsPath, fileType } = (0, utils_1.getInputs)();
+        const { token, title, groups } = (0, utils_1.getInputs)();
+        const testGroups = (0, Group_1.getTestGroups)(groups);
         const testReportProcessor = TestReportProcessor_1.TestReportProcessor.getInstance();
-        var testResult = yield testReportProcessor.processReports(resultsPath, fileType);
+        var testResult = yield testReportProcessor.processReports(testGroups);
         const commentBuilder = new CommentBuilder_1.CommentBuilder(testResult);
         const comment = commentBuilder
             .withHeader(title)
@@ -564,8 +588,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const inputs = {
     token: 'github-token',
     title: 'comment-title',
-    resultsPath: 'results-path',
-    fileType: 'file-type'
+    groups: 'groups'
 };
 const outputs = {
     total: 'tests-total',
@@ -584,8 +607,7 @@ const getInputs = () => {
     return {
         token,
         title: core.getInput(inputs.title),
-        resultsPath: core.getInput(inputs.resultsPath),
-        fileType: core.getInput(inputs.fileType)
+        groups: core.getInput(inputs.groups)
     };
 };
 exports.getInputs = getInputs;
