@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import {IResult} from './data'
+import {Group} from './data/Group'
 import {DotnetTrxParser} from './parsers/DotnetTrxParser'
 import {MochaJsonParser} from './parsers/MochaJsonParser'
 import {log, setFailed, setResultOutputs} from './utils'
@@ -22,21 +23,25 @@ export class TestReportProcessor {
     return this._instance
   }
 
-  public async processReports(
-    reportPath: string,
-    extension: string
-  ): Promise<IResult> {
+  public async processReports(groups: Group[]): Promise<IResult> {
     const result = this.DefaultTestResult
-    const filePaths = this.findReportsInDirectory(reportPath, extension)
-    if (!filePaths.length) {
-      throw Error(`No test results found in ${reportPath}`)
-    }
 
-    for (const path of filePaths) {
-      await this.processResult(path, result, extension)
-    }
+    groups.forEach(async group => {
+      const filePaths = this.findReportsInDirectory(
+        group.filePath,
+        group.extension
+      )
 
-    setResultOutputs(result)
+      if (!filePaths.length) {
+        throw Error(`No test results found in ${group.filePath}`)
+      }
+
+      for (const path of filePaths) {
+        await this.processResult(path, result, group.extension)
+      }
+
+      setResultOutputs(result)
+    })
 
     if (!result.success) {
       setFailed('Tests Failed')

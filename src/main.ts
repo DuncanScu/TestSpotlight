@@ -1,23 +1,17 @@
-import {getInputs, log, publishComment, setFailed, setSummary} from './utils'
+import {getInputs, publishComment, setFailed, setSummary} from './utils'
 import {TestReportProcessor} from './TestReportProcessor'
 import {CommentBuilder} from './CommentBuilder'
 import {SummaryGenerator} from './SummaryGenerator'
+import {getTestGroups} from './data/Group'
 
 const run = async (): Promise<void> => {
   try {
     const {token, title, groups} = getInputs()
 
-    const groupsData = groups.split(',')
-
-    log(groupsData[0])
-    const resultsPath = groupsData[0].split(':')[0]
-    const fileType = groupsData[0].split(':')[1]
+    const testGroups = getTestGroups(groups)
 
     const testReportProcessor = TestReportProcessor.getInstance()
-    var testResult = await testReportProcessor.processReports(
-      resultsPath,
-      fileType
-    )
+    var testResult = await testReportProcessor.processReports(testGroups)
 
     const commentBuilder = new CommentBuilder(testResult)
     const comment = commentBuilder

@@ -113,17 +113,19 @@ class TestReportProcessor {
         }
         return this._instance;
     }
-    processReports(reportPath, extension) {
+    processReports(groups) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = this.DefaultTestResult;
-            const filePaths = this.findReportsInDirectory(reportPath, extension);
-            if (!filePaths.length) {
-                throw Error(`No test results found in ${reportPath}`);
-            }
-            for (const path of filePaths) {
-                yield this.processResult(path, result, extension);
-            }
-            (0, utils_1.setResultOutputs)(result);
+            groups.forEach((group) => __awaiter(this, void 0, void 0, function* () {
+                const filePaths = this.findReportsInDirectory(group.filePath, group.extension);
+                if (!filePaths.length) {
+                    throw Error(`No test results found in ${group.filePath}`);
+                }
+                for (const path of filePaths) {
+                    yield this.processResult(path, result, group.extension);
+                }
+                (0, utils_1.setResultOutputs)(result);
+            }));
             if (!result.success) {
                 (0, utils_1.setFailed)('Tests Failed');
             }
@@ -174,6 +176,24 @@ class TestReportProcessor {
     }
 }
 exports.TestReportProcessor = TestReportProcessor;
+
+
+/***/ }),
+
+/***/ 9894:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getTestGroups = void 0;
+const getTestGroups = (groupsString) => {
+    return groupsString.split(',').map(groupData => {
+        const [filePath, extension] = groupData.split(':');
+        return { filePath, extension };
+    });
+};
+exports.getTestGroups = getTestGroups;
 
 
 /***/ }),
@@ -295,15 +315,13 @@ const utils_1 = __nccwpck_require__(1606);
 const TestReportProcessor_1 = __nccwpck_require__(7182);
 const CommentBuilder_1 = __nccwpck_require__(8278);
 const SummaryGenerator_1 = __nccwpck_require__(7601);
+const Group_1 = __nccwpck_require__(9894);
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { token, title, groups } = (0, utils_1.getInputs)();
-        const groupsData = groups.split(',');
-        (0, utils_1.log)(groupsData[0]);
-        const resultsPath = groupsData[0].split(':')[0];
-        const fileType = groupsData[0].split(':')[1];
+        const testGroups = (0, Group_1.getTestGroups)(groups);
         const testReportProcessor = TestReportProcessor_1.TestReportProcessor.getInstance();
-        var testResult = yield testReportProcessor.processReports(resultsPath, fileType);
+        var testResult = yield testReportProcessor.processReports(testGroups);
         const commentBuilder = new CommentBuilder_1.CommentBuilder(testResult);
         const comment = commentBuilder
             .withHeader(title)
