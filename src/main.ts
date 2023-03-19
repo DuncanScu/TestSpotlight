@@ -1,4 +1,4 @@
-import { getInputs, publishComment, setFailed, setSummary } from './utils';
+import { getInputs, log, publishComment, setFailed, setSummary } from './utils';
 import { TestReportProcessor } from './TestReportProcessor';
 import { CommentBuilder } from './CommentBuilder';
 import { SummaryGenerator } from './SummaryGenerator';
@@ -17,6 +17,8 @@ const run = async (): Promise<void> => {
     // What if there is just the resultsPath? pass just that
 
     const resultPaths = mergeResultPaths(resultsPath, resultGroups);
+
+    log(resultPaths[0].resultsPath)
 
     // Getting the test results
     const testReportProcessor = new TestReportProcessor();

@@ -284,6 +284,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         // What if the results path has something nad the groups has things? Merge them
         // What if there is just the resultsPath? pass just that
         const resultPaths = mergeResultPaths(resultsPath, resultGroups);
+        (0, utils_1.log)(resultPaths[0].resultsPath);
         // Getting the test results
         const testReportProcessor = new TestReportProcessor_1.TestReportProcessor();
         var testResult = yield testReportProcessor.processReports(resultPaths[0].resultsPath);
