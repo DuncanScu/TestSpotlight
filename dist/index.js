@@ -493,9 +493,8 @@ class MochaJsonParser {
             };
         };
         this.parseSuits = (file) => {
-            (0, utils_1.log)(JSON.stringify(file));
-            const suites = file.results.suites;
-            (0, utils_1.log)('Suites');
+            const fileResults = file.results;
+            const suites = fileResults.flatMap(result => result.suites);
             const results = [];
             suites.forEach(suite => {
                 const name = suite.title;
@@ -508,7 +507,6 @@ class MochaJsonParser {
         };
         this.parseTests = (tests) => {
             const results = [];
-            (0, utils_1.log)('Tests');
             tests.forEach(test => {
                 var _a, _b, _c, _d;
                 const name = test.title;
