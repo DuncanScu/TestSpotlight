@@ -280,10 +280,13 @@ const CommentBuilder_1 = __nccwpck_require__(8278);
 const SummaryGenerator_1 = __nccwpck_require__(7601);
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { token, title, resultsPath } = (0, utils_1.getInputs)();
+        const { token, title, resultsPath, resultGroups } = (0, utils_1.getInputs)();
+        // What if the results path has something nad the groups has things? Merge them
+        // What if there is just the resultsPath? pass just that
+        const resultPaths = mergeResultPaths(resultsPath, resultGroups);
         // Getting the test results
         const testReportProcessor = new TestReportProcessor_1.TestReportProcessor();
-        var testResult = yield testReportProcessor.processReports(resultsPath);
+        var testResult = yield testReportProcessor.processReports(resultPaths[0].resultsPath);
         // Build the comment
         const commentBuilder = new CommentBuilder_1.CommentBuilder(testResult);
         const comment = commentBuilder
@@ -304,6 +307,13 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 run();
+const mergeResultPaths = (resultPath, resultGroups) => {
+    const mergedResult = resultGroups ? resultGroups : [];
+    if (resultPath) {
+        mergedResult.push({ resultsPath: resultPath, groupTitle: "" });
+    }
+    return mergedResult;
+};
 
 
 /***/ }),
@@ -471,12 +481,8 @@ const core = __importStar(__nccwpck_require__(2186));
 const inputs = {
     token: 'github-token',
     title: 'comment-title',
-    postNewComment: 'post-new-comment',
-    allowFailedTests: 'allow-failed-tests',
     resultsPath: 'results-path',
-    coveragePath: 'coverage-path',
-    coverageType: 'coverage-type',
-    coverageThreshold: 'coverage-threshold'
+    resultGroups: 'result-groups'
 };
 const outputs = {
     total: 'tests-total',
@@ -495,7 +501,8 @@ const getInputs = () => {
     return {
         token,
         title: core.getInput(inputs.title),
-        resultsPath: core.getInput(inputs.resultsPath)
+        resultsPath: core.getInput(inputs.resultsPath),
+        resultGroups: JSON.parse(core.getInput(inputs.resultGroups))
     };
 };
 exports.getInputs = getInputs;
