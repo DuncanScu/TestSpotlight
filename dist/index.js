@@ -133,10 +133,9 @@ class TestReportProcessor {
                 if (!paths.length) {
                     throw Error(`No test results found in ${group.filePath}, with ${group.type}`);
                 }
-                paths.forEach(path => filePaths.push({ path: path, type: group.type }));
+                paths.forEach(path => filePaths.push({ path: path, type: fileExtension }));
             }));
             for (const resultPath of filePaths) {
-                (0, utils_1.log)(`Current result total = ${result.total}`);
                 yield this.processResult(resultPath.path, result, resultPath.type);
                 if (!result.success) {
                     (0, utils_1.setFailed)('Tests Failed');

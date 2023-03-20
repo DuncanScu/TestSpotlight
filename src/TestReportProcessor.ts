@@ -37,11 +37,10 @@ export class TestReportProcessor {
         )
       }
 
-      paths.forEach(path => filePaths.push({path: path, type: group.type}))
+      paths.forEach(path => filePaths.push({path: path, type: fileExtension}))
     })
 
     for (const resultPath of filePaths) {
-      log(`Current result total = ${result.total}`)
       await this.processResult(resultPath.path, result, resultPath.type)
 
       if (!result.success) {
