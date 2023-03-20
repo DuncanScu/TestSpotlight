@@ -13,7 +13,7 @@ inputs:
     required: false
     default: 'Test Results'
   groups:
-    description: 'Comma-seperated list of filesources:file exstension pairs. Groups must of be of format <source>:<extension>.'
+    description: 'Comma-seperated list of filesources:file exstension pairs. Groups must of be of format <source>:<type> E.g. ./test_results:mocha.'
     required: true
 
 runs:

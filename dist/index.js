@@ -95,6 +95,16 @@ const MochaJsonParser_1 = __nccwpck_require__(3288);
 const utils_1 = __nccwpck_require__(1606);
 class TestReportProcessor {
     constructor() {
+        this.resolveFileExtension = (type) => {
+            switch (type) {
+                case 'trx':
+                    return '.trx';
+                case 'mocha':
+                    return '.json';
+                default:
+                    return '';
+            }
+        };
         this.DefaultTestResult = {
             success: true,
             elapsed: 0,
@@ -118,15 +128,15 @@ class TestReportProcessor {
             const result = this.DefaultTestResult;
             const filePaths = [];
             groups.forEach((group) => __awaiter(this, void 0, void 0, function* () {
-                const paths = this.findReportsInDirectory(group.filePath, group.extension);
+                const fileExtension = this.resolveFileExtension(group.type);
+                const paths = this.findReportsInDirectory(group.filePath, fileExtension);
                 if (!paths.length) {
-                    throw Error(`No test results found in ${group.filePath}, with ${group.extension}`);
+                    throw Error(`No test results found in ${group.filePath}, with ${group.type}`);
                 }
-                paths.forEach(path => filePaths.push({ path: path, extension: group.extension }));
+                paths.forEach(path => filePaths.push({ path: path, type: fileExtension }));
             }));
             for (const resultPath of filePaths) {
-                (0, utils_1.log)(`Current result total = ${result.total}`);
-                yield this.processResult(resultPath.path, result, resultPath.extension);
+                yield this.processResult(resultPath.path, result, resultPath.type);
                 if (!result.success) {
                     (0, utils_1.setFailed)('Tests Failed');
                 }
@@ -191,8 +201,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getTestGroups = void 0;
 const getTestGroups = (groupsString) => {
     return groupsString.split(',').map(groupData => {
-        const [filePath, extension] = groupData.split(':');
-        return { filePath, extension };
+        const [filePath, type] = groupData.split(':');
+        return { filePath, type };
     });
 };
 exports.getTestGroups = getTestGroups;

@@ -25,24 +25,23 @@ export class TestReportProcessor {
 
   public async processReports(groups: Group[]): Promise<IResult> {
     const result = this.DefaultTestResult
-    const filePaths: {path: string; extension: string}[] = []
+    const filePaths: {path: string; type: string}[] = []
     groups.forEach(async group => {
-      const paths = this.findReportsInDirectory(group.filePath, group.extension)
+      const fileExtension = this.resolveFileExtension(group.type)
+
+      const paths = this.findReportsInDirectory(group.filePath, fileExtension)
 
       if (!paths.length) {
         throw Error(
-          `No test results found in ${group.filePath}, with ${group.extension}`
+          `No test results found in ${group.filePath}, with ${group.type}`
         )
       }
 
-      paths.forEach(path =>
-        filePaths.push({path: path, extension: group.extension})
-      )
+      paths.forEach(path => filePaths.push({path: path, type: fileExtension}))
     })
 
     for (const resultPath of filePaths) {
-      log(`Current result total = ${result.total}`)
-      await this.processResult(resultPath.path, result, resultPath.extension)
+      await this.processResult(resultPath.path, result, resultPath.type)
 
       if (!result.success) {
         setFailed('Tests Failed')
@@ -50,6 +49,17 @@ export class TestReportProcessor {
     }
 
     return result
+  }
+
+  private resolveFileExtension = (type: string) => {
+    switch (type) {
+      case 'trx':
+        return '.trx'
+      case 'mocha':
+        return '.json'
+      default:
+        return ''
+    }
   }
 
   private async processResult(

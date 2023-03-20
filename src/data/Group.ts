@@ -1,11 +1,11 @@
 export interface Group {
   filePath: string
-  extension: string
+  type: string
 }
 
 export const getTestGroups = (groupsString: string): Group[] => {
   return groupsString.split(',').map(groupData => {
-    const [filePath, extension] = groupData.split(':')
-    return {filePath, extension} as Group
+    const [filePath, type] = groupData.split(':')
+    return {filePath, type} as Group
   })
 }
